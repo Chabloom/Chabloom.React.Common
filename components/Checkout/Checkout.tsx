@@ -1,35 +1,21 @@
 import React from "react";
 
-import {
-  Badge,
-  Button,
-  Container,
-  createStyles,
-  Grid,
-  InputAdornment,
-  Link,
-  Paper,
-  TextField,
-  Theme,
-  Typography,
-} from "@material-ui/core";
+import { Button, Container, createStyles, Grid, Hidden, Theme, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import amex from "../../images/networks/amex.png";
-import discover from "../../images/networks/discover.png";
-import mastercard from "../../images/networks/mastercard.png";
-import visa from "../../images/networks/visa.png";
-
-import { PaymentCardsApi, PaymentCardViewModel } from "../../types";
 import { ProductsApi, ProductViewModel } from "../../../types";
 
 import { useAppContext } from "../../../AppContext";
+import { ContactInfo } from "./ContactInfo";
+import { BillingInfo } from "./BillingInfo";
+import { ShippingInfo } from "./ShippingInfo";
+import { PaymentInfo } from "./PaymentInfo";
+import { Status } from "../Status";
+import { ProductInfo } from "./ProductInfo";
+import { PricingInfo } from "./PricingInfo";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    paper: {
-      padding: theme.spacing(1),
-    },
     root: {
       "& .MuiTextField-root": {
         margin: theme.spacing(1),
@@ -45,16 +31,23 @@ const useStyles = makeStyles((theme: Theme) =>
     header: {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
-      padding: theme.spacing(3),
-      marginBottom: theme.spacing(3),
+      position: "absolute",
+      width: "100%",
     },
     infoForm: {
-      marginBottom: theme.spacing(1),
+      [theme.breakpoints.down("sm")]: {
+        marginTop: theme.spacing(1),
+      },
+      [theme.breakpoints.up("sm")]: {
+        marginTop: theme.spacing(3),
+      },
     },
-    checkoutItem: {
-      display: "flex",
-      marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(2),
+    container: {
+      margin: "0",
+      padding: "0",
+      [theme.breakpoints.up("sm")]: {
+        height: "100vh",
+      },
     },
   })
 );
@@ -74,34 +67,54 @@ export const Checkout: React.FC = () => {
 
   const [error, setError] = React.useState("");
   const [processing, setProcessing] = React.useState(false);
-  const [paymentCards, setPaymentCards] = React.useState<Array<PaymentCardViewModel>>([]);
+  //const [paymentCards, setPaymentCards] = React.useState<Array<PaymentCardViewModel>>([]);
   const [products, setProducts] = React.useState<Array<ProductViewModel>>([]);
   const [subTotal, setSubTotal] = React.useState(0);
   const [taxes, setTaxes] = React.useState(0);
 
+  // Contact info
   const [userInfoOpen, setUserInfoOpen] = React.useState(true);
+  const [userInfoSaved, setUserInfoSaved] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
-  const [billingAddressOpen, setBillingAddressOpen] = React.useState(false);
-  const [name1, setName1] = React.useState("");
-  const [name2, setName2] = React.useState("");
-  const [company, setCompany] = React.useState("");
-  const [address1, setAddress1] = React.useState("");
-  const [address2, setAddress2] = React.useState("");
-  const [city, setCity] = React.useState("");
-  const [country, setCountry] = React.useState("");
-  const [state, setState] = React.useState("");
-  const [postCode, setPostCode] = React.useState("");
+  // Billing info
+  const [billingInfoOpen, setBillingInfoOpen] = React.useState(false);
+  const [billingInfoSaved, setBillingInfoSaved] = React.useState(false);
+  const [billingName1, setBillingName1] = React.useState("");
+  const [billingName2, setBillingName2] = React.useState("");
+  const [billingCompany, setBillingCompany] = React.useState("");
+  const [billingAddress1, setBillingAddress1] = React.useState("");
+  const [billingAddress2, setBillingAddress2] = React.useState("");
+  const [billingCity, setBillingCity] = React.useState("");
+  const [billingCountry, setBillingCountry] = React.useState("");
+  const [billingState, setBillingState] = React.useState("");
+  const [billingPostCode, setBillingPostCode] = React.useState("");
+  const [billingAsShipping, setBillingAsShipping] = React.useState(false);
 
+  // Shipping info
+  const [shippingInfoOpen, setShippingInfoOpen] = React.useState(false);
+  const [shippingInfoSaved, setShippingInfoSaved] = React.useState(false);
+  const [shippingName1, setShippingName1] = React.useState("");
+  const [shippingName2, setShippingName2] = React.useState("");
+  const [shippingCompany, setShippingCompany] = React.useState("");
+  const [shippingAddress1, setShippingAddress1] = React.useState("");
+  const [shippingAddress2, setShippingAddress2] = React.useState("");
+  const [shippingCity, setShippingCity] = React.useState("");
+  const [shippingCountry, setShippingCountry] = React.useState("");
+  const [shippingState, setShippingState] = React.useState("");
+  const [shippingPostCode, setShippingPostCode] = React.useState("");
+
+  // Payment info
   const [paymentInfoOpen, setPaymentInfoOpen] = React.useState(false);
+  const [paymentInfoSaved, setPaymentInfoSaved] = React.useState(false);
   const [cardType, setCardType] = React.useState("");
-  const [cardImage, setCardImage] = React.useState("");
   const [cardNumber, setCardNumber] = React.useState("");
   const [cardName, setCardName] = React.useState("");
   const [cardExpiration, setCardExpiration] = React.useState("");
   const [cardSecurityCode, setCardSecurityCode] = React.useState("");
 
-  React.useEffect(() => {
+  // TODO: Allow payment card storage
+  /*React.useEffect(() => {
     const getPaymentCards = async () => {
       if (userToken) {
         setProcessing(true);
@@ -116,7 +129,7 @@ export const Checkout: React.FC = () => {
       }
     };
     getPaymentCards().then();
-  }, [userToken]);
+  }, [userToken]);*/
 
   React.useEffect(() => {
     const getProducts = async () => {
@@ -139,6 +152,32 @@ export const Checkout: React.FC = () => {
   }, [userToken]);
 
   React.useEffect(() => {
+    if (billingAsShipping) {
+      setShippingInfoSaved(true);
+      setShippingName1(billingName1);
+      setShippingName2(billingName2);
+      setShippingCompany(billingCompany);
+      setShippingAddress1(billingAddress1);
+      setShippingAddress2(billingAddress2);
+      setShippingCity(billingCity);
+      setShippingCountry(billingCountry);
+      setShippingState(billingState);
+      setShippingPostCode(billingPostCode);
+    } else {
+      setShippingInfoSaved(false);
+      setShippingName1("");
+      setShippingName2("");
+      setShippingCompany("");
+      setShippingAddress1("");
+      setShippingAddress2("");
+      setShippingCity("");
+      setShippingCountry("");
+      setShippingState("");
+      setShippingPostCode("");
+    }
+  }, [billingInfoSaved]);
+
+  React.useEffect(() => {
     let tempSubTotal = 0;
     products.forEach((product) => {
       tempSubTotal += product.price * (order.productCounts.get(product.id) as number);
@@ -150,416 +189,132 @@ export const Checkout: React.FC = () => {
   return (
     <React.Fragment>
       <header className={classes.header}>
-        <img src="images/demo/logo-alternate.svg" height="50" />
+        <Toolbar>
+          <img src="images/demo/logo-alternate.svg" height="50" />
+        </Toolbar>
       </header>
-      <Container>
-        <Grid container spacing={1}>
-          <Grid item xs={7}>
-            {userInfoOpen && (
-              <div className={classes.infoForm}>
-                <Typography variant="h6">Contact information</Typography>
-                <Paper className={classes.paper} variant="outlined">
-                  <form
-                    className={classes.root}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setUserInfoOpen(false);
-                      if (!name1) {
-                        setBillingAddressOpen(true);
-                      }
-                    }}
-                  >
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        label="Email address"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <Link href="/cart" className={classes.flexGrow}>
-                        <Typography>{"< Return to cart"}</Typography>
-                      </Link>
-                      <Button size="large" variant="contained">
-                        Save contact information
-                      </Button>
-                    </div>
-                  </form>
-                </Paper>
-              </div>
-            )}
-            {!userInfoOpen && email && (
-              <div className={classes.infoForm}>
-                <Paper className={classes.paper} variant="outlined">
-                  <div className={classes.flex}>
-                    <Typography className={classes.flexGrow}>Contact</Typography>
-                    <Typography className={classes.flexGrow}>{email}</Typography>
-                    <Button
-                      disabled={billingAddressOpen || paymentInfoOpen}
-                      onClick={() => {
-                        setUserInfoOpen(true);
-                        setBillingAddressOpen(false);
-                        setPaymentInfoOpen(false);
-                      }}
-                      variant="text"
-                    >
-                      Change
-                    </Button>
-                  </div>
-                </Paper>
-              </div>
-            )}
-            {billingAddressOpen && (
-              <div className={classes.infoForm}>
-                <Typography variant="h6">Billing address</Typography>
-                <Paper className={classes.paper} variant="outlined">
-                  <form
-                    className={classes.root}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setBillingAddressOpen(false);
-                      if (!cardType) {
-                        setPaymentInfoOpen(true);
-                      }
-                    }}
-                  >
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="given-name"
-                        value={name1}
-                        onChange={(e) => setName1(e.target.value)}
-                        label="First name"
-                      />
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="family-name"
-                        value={name2}
-                        onChange={(e) => setName2(e.target.value)}
-                        label="Last name"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        autoComplete="organization"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        label="Company (optional)"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="address-line1"
-                        value={address1}
-                        onChange={(e) => setAddress1(e.target.value)}
-                        label="Address"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        autoComplete="address-line2"
-                        value={address2}
-                        onChange={(e) => setAddress2(e.target.value)}
-                        label="Apartment, suite, etc. (optional)"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="address-level2"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        label="City"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="country"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        label="Country/Region"
-                      />
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="address-level1"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        label="State"
-                      />
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="postal-code"
-                        value={postCode}
-                        onChange={(e) => setPostCode(e.target.value)}
-                        label="Postal code"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <Link href="/cart" className={classes.flexGrow}>
-                        <Typography>{"< Return to cart"}</Typography>
-                      </Link>
-                      <Button size="large" variant="contained">
-                        Save billing address
-                      </Button>
-                    </div>
-                  </form>
-                </Paper>
-              </div>
-            )}
-            {!billingAddressOpen && name1 && (
-              <div className={classes.infoForm}>
-                <Paper className={classes.paper} variant="outlined">
-                  <div className={classes.flex}>
-                    <Typography className={classes.flexGrow}>Billing</Typography>
-                    <Typography className={classes.flexGrow}>{`${address1} ${city}, ${state} ${country}`}</Typography>
-                    <Button
-                      disabled={userInfoOpen || paymentInfoOpen}
-                      onClick={() => {
-                        setBillingAddressOpen(true);
-                        setPaymentInfoOpen(false);
-                      }}
-                      variant="text"
-                    >
-                      Change
-                    </Button>
-                  </div>
-                </Paper>
-              </div>
-            )}
-            {paymentInfoOpen && (
-              <div className={classes.infoForm}>
-                <Typography variant="h6">Payment</Typography>
-                <Typography variant="subtitle1">All payments are secure and encrypted</Typography>
-                <Paper className={classes.paper} variant="outlined">
-                  <form
-                    className={classes.root}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setPaymentInfoOpen(false);
-                    }}
-                  >
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        inputMode="numeric"
-                        autoComplete="cc-number"
-                        value={cardNumber}
-                        onChange={(e) => {
-                          const number = e.target.value.replaceAll(/[^0-9]+/g, "");
-                          if (number.startsWith("34") || number.startsWith("37")) {
-                            setCardType("amex");
-                            setCardImage(amex);
-                            // Use 4-6-5 format
-                            const sub1 = `${number.substring(0, 1)}${number.substring(1, 2)}${number.substring(
-                              2,
-                              3
-                            )}${number.substring(3, 4)}`;
-                            const sub2 = `${number.substring(4, 5)}${number.substring(5, 6)}${number.substring(
-                              6,
-                              7
-                            )}${number.substring(7, 8)}${number.substring(8, 9)}${number.substring(9, 10)}`;
-                            const sub3 = `${number.substring(10, 11)}${number.substring(11, 12)}${number.substring(
-                              12,
-                              13
-                            )}${number.substring(13, 14)}${number.substring(14, 15)}`;
-                            if (sub3) {
-                              setCardNumber(`${sub1} ${sub2} ${sub3}`);
-                            } else if (sub2) {
-                              setCardNumber(`${sub1} ${sub2}`);
-                            } else {
-                              setCardNumber(sub1);
-                            }
-                            return;
-                          } else if (number.startsWith("4")) {
-                            setCardType("visa");
-                            setCardImage(visa);
-                          } else if (number.startsWith("5")) {
-                            setCardType("mastercard");
-                            setCardImage(mastercard);
-                          } else if (number.startsWith("6")) {
-                            setCardType("discover");
-                            setCardImage(discover);
-                          } else {
-                            // Unknown card type
-                            setCardType("");
-                            setCardNumber(number.substring(0, 16));
-                            return;
-                          }
-                          // Use 4-4-4-4 format
-                          const sub1 = `${number.substring(0, 1)}${number.substring(1, 2)}${number.substring(
-                            2,
-                            3
-                          )}${number.substring(3, 4)}`;
-                          const sub2 = `${number.substring(4, 5)}${number.substring(5, 6)}${number.substring(
-                            6,
-                            7
-                          )}${number.substring(7, 8)}`;
-                          const sub3 = `${number.substring(8, 9)}${number.substring(9, 10)}${number.substring(
-                            10,
-                            11
-                          )}${number.substring(11, 12)}`;
-                          const sub4 = `${number.substring(12, 13)}${number.substring(13, 14)}${number.substring(
-                            14,
-                            15
-                          )}${number.substring(15, 16)}`;
-                          if (sub4) {
-                            setCardNumber(`${sub1} ${sub2} ${sub3} ${sub4}`);
-                          } else if (sub3) {
-                            setCardNumber(`${sub1} ${sub2} ${sub3}`);
-                          } else if (sub2) {
-                            setCardNumber(`${sub1} ${sub2}`);
-                          } else {
-                            setCardNumber(sub1);
-                          }
-                        }}
-                        label="Card number"
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              {cardType && <img src={cardImage} height="30" alt="issuer" />}
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        autoComplete="cc-name"
-                        value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
-                        inputProps={{ maxLength: 255 }}
-                        label="Name on card"
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <TextField
-                        fullWidth
-                        required
-                        inputMode="numeric"
-                        autoComplete="cc-exp"
-                        value={cardExpiration}
-                        onChange={(e) => {
-                          const expiration = e.target.value.replaceAll("/", "").replaceAll(/[^0-9]+/g, "");
-                          const sub1 = `${expiration.substring(0, 1)}${expiration.substring(1, 2)}`;
-                          const sub2 = `${expiration.substring(2, 3)}${expiration.substring(3, 4)}`;
-                          if (sub2) {
-                            setCardExpiration(`${sub1} / ${sub2}`);
-                          } else {
-                            setCardExpiration(sub1);
-                          }
-                        }}
-                        label="Expiration date (MM / YY)"
-                      />
-                      <TextField
-                        fullWidth
-                        required
-                        inputMode="numeric"
-                        autoComplete="cc-csc"
-                        value={cardSecurityCode}
-                        onChange={(e) => {
-                          const code = e.target.value.replaceAll(/[^0-9]+/g, "");
-                          setCardSecurityCode(code);
-                        }}
-                        inputProps={{ maxLength: cardType === "amex" ? 4 : 3 }}
-                        label={`Security code (${cardType === "amex" ? 4 : 3} digits)`}
-                      />
-                    </div>
-                    <div className={classes.flex}>
-                      <Link href="/cart" className={classes.flexGrow}>
-                        <Typography>{"< Return to cart"}</Typography>
-                      </Link>
-                      <Button size="large" variant="contained">
-                        Save payment information
-                      </Button>
-                    </div>
-                  </form>
-                </Paper>
-              </div>
-            )}
-            {!paymentInfoOpen && cardType && (
-              <div className={classes.infoForm}>
-                <Paper className={classes.paper} variant="outlined">
-                  <div className={classes.flex}>
-                    <Typography className={classes.flexGrow}>Payment</Typography>
-                    <Typography className={classes.flexGrow}>
-                      {`${cardType.toUpperCase()} ending in ${cardNumber.slice(-4)}`}
-                    </Typography>
-                    <Button
-                      disabled={userInfoOpen || billingAddressOpen}
-                      onClick={() => {
-                        setBillingAddressOpen(false);
-                        setPaymentInfoOpen(true);
-                      }}
-                      variant="text"
-                    >
-                      Change
-                    </Button>
-                  </div>
-                </Paper>
-              </div>
-            )}
-          </Grid>
-          <Grid item xs={5}>
+      <Grid container className={classes.container}>
+        <Grid item sm={7} xs={12}>
+          <Toolbar />
+          <Container>
             <div className={classes.infoForm}>
-              <Paper className={classes.paper} variant="outlined">
-                {products.map((product) => {
-                  const count = order.productCounts.get(product.id) as number;
-                  const price = formatter.format(product.price * count);
-                  return (
-                    <div key={`product-${product.id}`} className={classes.checkoutItem}>
-                      <Badge color="secondary" badgeContent={count} style={{ marginRight: 20 }}>
-                        <img src={`images/demo/${product.id.toUpperCase()}.webp`} style={{ maxHeight: 40 }} />
-                      </Badge>
-                      <Typography className={classes.flexGrow}>{product.name}</Typography>
-                      <Typography style={{ margin: "auto" }}>{price}</Typography>
-                    </div>
-                  );
-                })}
-              </Paper>
+              <ContactInfo
+                userInfoOpen={userInfoOpen}
+                setUserInfoOpen={setUserInfoOpen}
+                userInfoSaved={userInfoSaved}
+                setUserInfoSaved={setUserInfoSaved}
+                billingInfoOpen={billingInfoOpen}
+                setBillingInfoOpen={setBillingInfoOpen}
+                billingInfoSaved={billingInfoSaved}
+                shippingInfoOpen={shippingInfoOpen}
+                paymentInfoOpen={paymentInfoOpen}
+                email={email}
+                setEmail={setEmail}
+              />
             </div>
             <div className={classes.infoForm}>
-              <Paper className={classes.paper} variant="outlined">
-                <div className={classes.flex}>
-                  <Typography className={classes.flexGrow}>Subtotal</Typography>
-                  <Typography>{formatter.format(subTotal)}</Typography>
-                </div>
-                <div className={classes.flex}>
-                  <Typography className={classes.flexGrow}>Taxes (estimated)</Typography>
-                  <Typography>{formatter.format(taxes)}</Typography>
-                </div>
-              </Paper>
+              <BillingInfo
+                userInfoOpen={userInfoOpen}
+                billingInfoOpen={billingInfoOpen}
+                setBillingInfoOpen={setBillingInfoOpen}
+                billingInfoSaved={billingInfoSaved}
+                setBillingInfoSaved={setBillingInfoSaved}
+                shippingInfoOpen={shippingInfoOpen}
+                setShippingInfoOpen={setShippingInfoOpen}
+                shippingInfoSaved={shippingInfoSaved}
+                paymentInfoOpen={paymentInfoOpen}
+                name1={billingName1}
+                setName1={setBillingName1}
+                name2={billingName2}
+                setName2={setBillingName2}
+                company={billingCompany}
+                setCompany={setBillingCompany}
+                address1={billingAddress1}
+                setAddress1={setBillingAddress1}
+                address2={billingAddress2}
+                setAddress2={setBillingAddress2}
+                city={billingCity}
+                setCity={setBillingCity}
+                country={billingCountry}
+                setCountry={setBillingCountry}
+                state={billingState}
+                setState={setBillingState}
+                postCode={billingPostCode}
+                setPostCode={setBillingPostCode}
+                billingAsShipping={billingAsShipping}
+                setBillingAsShipping={setBillingAsShipping}
+              />
             </div>
             <div className={classes.infoForm}>
-              <Paper className={classes.paper} variant="outlined">
-                <div className={classes.flex}>
-                  <Typography variant="h6" className={classes.flexGrow}>
-                    Total
-                  </Typography>
-                  <Typography variant="h6">{formatter.format(subTotal + taxes)}</Typography>
-                </div>
-              </Paper>
+              <ShippingInfo
+                userInfoOpen={userInfoOpen}
+                billingInfoOpen={billingInfoOpen}
+                shippingInfoOpen={shippingInfoOpen}
+                setShippingInfoOpen={setShippingInfoOpen}
+                shippingInfoSaved={shippingInfoSaved}
+                setShippingInfoSaved={setShippingInfoSaved}
+                paymentInfoOpen={paymentInfoOpen}
+                setPaymentInfoOpen={setPaymentInfoOpen}
+                paymentInfoSaved={paymentInfoSaved}
+                name1={shippingName1}
+                setName1={setShippingName1}
+                name2={shippingName2}
+                setName2={setShippingName2}
+                company={shippingCompany}
+                setCompany={setShippingCompany}
+                address1={shippingAddress1}
+                setAddress1={setShippingAddress1}
+                address2={shippingAddress2}
+                setAddress2={setShippingAddress2}
+                city={shippingCity}
+                setCity={setShippingCity}
+                country={shippingCountry}
+                setCountry={setShippingCountry}
+                state={shippingState}
+                setState={setShippingState}
+                postCode={shippingPostCode}
+                setPostCode={setShippingPostCode}
+              />
             </div>
-            <div>
+            <div className={classes.infoForm}>
+              <PaymentInfo
+                userInfoOpen={userInfoOpen}
+                billingInfoOpen={billingInfoOpen}
+                shippingInfoOpen={shippingInfoOpen}
+                paymentInfoOpen={paymentInfoOpen}
+                setPaymentInfoOpen={setPaymentInfoOpen}
+                paymentInfoSaved={paymentInfoSaved}
+                setPaymentInfoSaved={setPaymentInfoSaved}
+                cardType={cardType}
+                setCardType={setCardType}
+                cardNumber={cardNumber}
+                setCardNumber={setCardNumber}
+                cardName={cardName}
+                setCardName={setCardName}
+                cardExpiration={cardExpiration}
+                setCardExpiration={setCardExpiration}
+                cardSecurityCode={cardSecurityCode}
+                setCardSecurityCode={setCardSecurityCode}
+              />
+            </div>
+          </Container>
+        </Grid>
+        <Grid item sm={5} xs={12} style={{ backgroundColor: "#F1F1F1", borderLeft: "1px solid #CCCCCC" }}>
+          <Hidden smDown>
+            <Toolbar />
+          </Hidden>
+          <Container>
+            <div className={classes.infoForm}>
+              <ProductInfo products={products} formatter={formatter} />
+              <Status processing={processing} error={error} />
+            </div>
+            <div className={classes.infoForm}>
+              <PricingInfo subTotal={subTotal} taxes={taxes} formatter={formatter} />
+            </div>
+            <div className={classes.infoForm}>
               <div className={classes.flex}>
                 <Button
-                  disabled={userInfoOpen || billingAddressOpen || paymentInfoOpen}
+                  disabled={userInfoOpen || billingInfoOpen || shippingInfoOpen || paymentInfoOpen}
                   size="large"
                   variant="contained"
                   style={{ marginLeft: "auto" }}
@@ -568,9 +323,9 @@ export const Checkout: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </Grid>
+          </Container>
         </Grid>
-      </Container>
+      </Grid>
     </React.Fragment>
   );
 };
