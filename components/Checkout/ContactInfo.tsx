@@ -71,6 +71,7 @@ export const ContactInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
+              name="email"
               type="email"
               autoComplete="email"
               value={email}
