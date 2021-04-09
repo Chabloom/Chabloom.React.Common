@@ -15,6 +15,11 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
+import amex from "../../images/networks/amex.png";
+import discover from "../../images/networks/discover.png";
+import mastercard from "../../images/networks/mastercard.png";
+import visa from "../../images/networks/visa.png";
+
 import { PaymentCardsApi, PaymentCardViewModel } from "../../types";
 import { ProductsApi, ProductViewModel } from "../../../types";
 
@@ -356,7 +361,7 @@ export const Checkout: React.FC = () => {
                         onChange={(e) => {
                           const number = e.target.value.replaceAll(/[^0-9]+/g, "");
                           if (number.startsWith("34") || number.startsWith("37")) {
-                            setCardType("AMEX");
+                            setCardType("amex");
                             // Use 4-6-5 format
                             const sub1 = `${number.substring(0, 1)}${number.substring(1, 2)}${number.substring(
                               2,
@@ -379,11 +384,11 @@ export const Checkout: React.FC = () => {
                             }
                             return;
                           } else if (number.startsWith("4")) {
-                            setCardType("VISA");
+                            setCardType("visa");
                           } else if (number.startsWith("5")) {
-                            setCardType("MASTERCARD");
+                            setCardType("mastercard");
                           } else if (number.startsWith("6")) {
-                            setCardType("DISCOVER");
+                            setCardType("discover");
                           } else {
                             // Unknown card type
                             setCardType("");
@@ -422,7 +427,7 @@ export const Checkout: React.FC = () => {
                           endAdornment: (
                             <InputAdornment position="end">
                               {cardType && (
-                                <img src={`images/${cardType.toLowerCase()}.png`} height="30" alt="issuer" />
+                                <img src={cardType} height="30" alt="issuer" />
                               )}
                             </InputAdornment>
                           ),
@@ -469,8 +474,8 @@ export const Checkout: React.FC = () => {
                           const code = e.target.value.replaceAll(/[^0-9]+/g, "");
                           setCardSecurityCode(code);
                         }}
-                        inputProps={{ maxLength: cardType.toUpperCase() === "AMEX" ? 4 : 3 }}
-                        label={`Security code (${cardType.toUpperCase() === "AMEX" ? 4 : 3} digits)`}
+                        inputProps={{ maxLength: cardType === "amex" ? 4 : 3 }}
+                        label={`Security code (${cardType === "amex" ? 4 : 3} digits)`}
                       />
                     </div>
                     <div className={classes.flex}>
