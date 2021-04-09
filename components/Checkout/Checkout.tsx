@@ -95,6 +95,7 @@ export const Checkout: React.FC = () => {
 
   const [paymentInfoOpen, setPaymentInfoOpen] = React.useState(false);
   const [cardType, setCardType] = React.useState("");
+  const [cardImage, setCardImage] = React.useState("");
   const [cardNumber, setCardNumber] = React.useState("");
   const [cardName, setCardName] = React.useState("");
   const [cardExpiration, setCardExpiration] = React.useState("");
@@ -149,7 +150,7 @@ export const Checkout: React.FC = () => {
   return (
     <React.Fragment>
       <header className={classes.header}>
-        <img src="images/demo/logo-alternate.svg" height="150" />
+        <img src="images/demo/logo-alternate.svg" height="50" />
       </header>
       <Container>
         <Grid container spacing={1}>
@@ -362,6 +363,7 @@ export const Checkout: React.FC = () => {
                           const number = e.target.value.replaceAll(/[^0-9]+/g, "");
                           if (number.startsWith("34") || number.startsWith("37")) {
                             setCardType("amex");
+                            setCardImage(amex);
                             // Use 4-6-5 format
                             const sub1 = `${number.substring(0, 1)}${number.substring(1, 2)}${number.substring(
                               2,
@@ -385,10 +387,13 @@ export const Checkout: React.FC = () => {
                             return;
                           } else if (number.startsWith("4")) {
                             setCardType("visa");
+                            setCardImage(visa);
                           } else if (number.startsWith("5")) {
                             setCardType("mastercard");
+                            setCardImage(mastercard);
                           } else if (number.startsWith("6")) {
                             setCardType("discover");
+                            setCardImage(discover);
                           } else {
                             // Unknown card type
                             setCardType("");
@@ -426,9 +431,7 @@ export const Checkout: React.FC = () => {
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
-                              {cardType && (
-                                <img src={cardType} height="30" alt="issuer" />
-                              )}
+                              {cardType && <img src={cardImage} height="30" alt="issuer" />}
                             </InputAdornment>
                           ),
                         }}
@@ -495,9 +498,9 @@ export const Checkout: React.FC = () => {
                 <Paper className={classes.paper} variant="outlined">
                   <div className={classes.flex}>
                     <Typography className={classes.flexGrow}>Payment</Typography>
-                    <Typography className={classes.flexGrow}>{`${cardType} ending ${cardNumber.slice(
-                      -4
-                    )} expires ${cardExpiration}`}</Typography>
+                    <Typography className={classes.flexGrow}>
+                      {`${cardType.toUpperCase()} ending in ${cardNumber.slice(-4)}`}
+                    </Typography>
                     <Button
                       disabled={userInfoOpen || billingAddressOpen}
                       onClick={() => {

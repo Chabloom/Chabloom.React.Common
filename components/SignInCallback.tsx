@@ -7,7 +7,7 @@ import { Status } from "./Status";
 
 import { useAppContext } from "../../AppContext";
 
-import logo from "../../logo.svg";
+import logo from "../images/chabloom-icon.svg";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
