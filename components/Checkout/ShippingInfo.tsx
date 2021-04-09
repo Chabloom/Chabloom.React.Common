@@ -103,6 +103,7 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
+              name="fname"
               autoComplete="given-name"
               value={name1}
               onChange={(e) => setName1(e.target.value)}
@@ -111,6 +112,7 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
+              name="lname"
               autoComplete="family-name"
               value={name2}
               onChange={(e) => setName2(e.target.value)}
@@ -130,7 +132,8 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
-              autoComplete="address-line1"
+              name="ship-address-line1"
+              autoComplete="shipping address-line1"
               value={address1}
               onChange={(e) => setAddress1(e.target.value)}
               label="Address"
@@ -139,7 +142,8 @@ export const ShippingInfo: React.FC<Props> = ({
           <div className={classes.flex}>
             <TextField
               fullWidth
-              autoComplete="address-line2"
+              name="ship-address-line2"
+              autoComplete="shipping address-line2"
               value={address2}
               onChange={(e) => setAddress2(e.target.value)}
               label="Apartment, suite, etc. (optional)"
@@ -149,7 +153,8 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
-              autoComplete="address-level2"
+              name="ship-city"
+              autoComplete="shipping address-level2"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               label="City"
@@ -159,7 +164,8 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
-              autoComplete="country"
+              name="ship-country"
+              autoComplete="shipping country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               label="Country/Region"
@@ -167,7 +173,8 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
-              autoComplete="address-level1"
+              name="ship-region"
+              autoComplete="shipping address-level1"
               value={state}
               onChange={(e) => setState(e.target.value)}
               label="State"
@@ -175,7 +182,8 @@ export const ShippingInfo: React.FC<Props> = ({
             <TextField
               fullWidth
               required
-              autoComplete="postal-code"
+              name="ship-postal"
+              autoComplete="shipping postal-code"
               value={postCode}
               onChange={(e) => setPostCode(e.target.value)}
               label="Postal code"
