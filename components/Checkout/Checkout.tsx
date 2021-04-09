@@ -3,7 +3,7 @@ import React from "react";
 import { Button, Container, createStyles, Grid, Hidden, Theme, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { ProductsApi, ProductViewModel } from "../../../types";
+import { ProductsApi, ProductViewModel } from "../../types";
 
 import { useAppContext } from "../../../AppContext";
 import { ContactInfo } from "./ContactInfo";
@@ -62,8 +62,9 @@ const formatter = new Intl.NumberFormat("en-US", {
 });
 
 export const Checkout: React.FC = () => {
-  const { userToken, order } = useAppContext();
   const classes = useStyles();
+
+  const { order } = useAppContext();
 
   const [error, setError] = React.useState("");
   const [processing, setProcessing] = React.useState(false);
@@ -133,23 +134,23 @@ export const Checkout: React.FC = () => {
 
   React.useEffect(() => {
     const getProducts = async () => {
-      if (userToken) {
-        setProcessing(true);
-        setProducts([]);
+      setProcessing(true);
+      setProducts([]);
+      if (order.productCounts && order.productCounts.size !== 0) {
         const api = new ProductsApi("");
         order.productCounts.forEach(async (productCount, productId) => {
-          const [ret, err] = await api.readItem(userToken, productId);
+          const [ret, err] = await api.readItem(productId);
           if (ret) {
             setProducts((prevState) => [...prevState, ret]);
           } else {
             setError(err);
           }
         });
-        setProcessing(false);
       }
+      setProcessing(false);
     };
     getProducts().then();
-  }, [userToken]);
+  }, [order]);
 
   React.useEffect(() => {
     if (billingAsShipping) {

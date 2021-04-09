@@ -3,7 +3,7 @@ import React from "react";
 import { Badge, createStyles, Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { ProductViewModel } from "../../../types";
+import { ProductViewModel } from "../../types";
 
 import { useAppContext } from "../../../AppContext";
 
