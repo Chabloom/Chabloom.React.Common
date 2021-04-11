@@ -6,4 +6,6 @@ export interface ProductViewModel extends BaseViewModel {
   description: string;
   price: number;
   categoryId: string;
+  images: Array<string>;
+  pickupMethods: Array<string>;
 }

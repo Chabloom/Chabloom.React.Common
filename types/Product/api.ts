@@ -4,16 +4,18 @@ import { ProductViewModel } from "./model";
 
 export class ProductsApi extends BaseApi<ProductViewModel> implements BaseApiType<ProductViewModel> {
   baseUrl: string;
+  method: string;
   categoryId: string;
 
-  constructor(categoryId = "") {
+  constructor(categoryId = "", method = "") {
     super();
     this.baseUrl = `${ApplicationConfig.ecommerceBackendPublicAddress}/api/products`;
     this.categoryId = categoryId;
+    this.method = method;
   }
 
   readItems(): Promise<[Array<ProductViewModel> | undefined, string]> {
-    return this._readItems(`${this.baseUrl}?categoryId=${this.categoryId}`, "", false);
+    return this._readItems(`${this.baseUrl}?method=${this.method}&categoryId=${this.categoryId}`, "", false);
   }
 
   readItem(itemId: string): Promise<[ProductViewModel | undefined, string]> {
