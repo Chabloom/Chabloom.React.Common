@@ -2,6 +2,7 @@ import React from "react";
 
 import { Button, createStyles, Link, Paper, TextField, Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { useAppContext } from "../../../AppContext";
 
 interface Props {
   userInfoOpen: boolean;
@@ -84,7 +85,19 @@ export const ShippingInfo: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
 
-  if (shippingInfoOpen) {
+  const { pickupMethod } = useAppContext();
+
+  React.useEffect(() => {
+    if (pickupMethod !== "Shipping") {
+      setShippingInfoSaved(true);
+      setShippingInfoOpen(false);
+      if (!paymentInfoSaved) {
+        setPaymentInfoOpen(true);
+      }
+    }
+  }, []);
+
+  if (shippingInfoOpen && pickupMethod === "Shipping") {
     return (
       <React.Fragment>
         <Typography variant="h6">Shipping address</Typography>
@@ -190,17 +203,17 @@ export const ShippingInfo: React.FC<Props> = ({
             />
           </div>
           <div className={classes.flex}>
-            <Link href="/cart" className={classes.flexGrow}>
-              <Typography>{"< Return to cart"}</Typography>
+            <Link href="/" className={classes.flexGrow}>
+              <Typography>{"< Return to store"}</Typography>
             </Link>
-            <Button size="large" variant="contained">
+            <Button type="submit" size="large" variant="contained">
               Save shipping address
             </Button>
           </div>
         </form>
       </React.Fragment>
     );
-  } else if (shippingInfoSaved) {
+  } else if (shippingInfoSaved && pickupMethod === "Shipping") {
     return (
       <Paper className={classes.paper} variant="outlined">
         <div className={classes.flex}>

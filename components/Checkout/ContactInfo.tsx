@@ -59,6 +59,7 @@ export const ContactInfo: React.FC<Props> = ({
         <form
           className={classes.root}
           onSubmit={(e) => {
+            console.log("submit");
             e.preventDefault();
             setUserInfoSaved(true);
             setUserInfoOpen(false);
@@ -80,10 +81,10 @@ export const ContactInfo: React.FC<Props> = ({
             />
           </div>
           <div className={classes.flex}>
-            <Link href="/cart" className={classes.flexGrow}>
-              <Typography>{"< Return to cart"}</Typography>
+            <Link href="/" className={classes.flexGrow}>
+              <Typography>{"< Return to store"}</Typography>
             </Link>
-            <Button size="large" variant="contained">
+            <Button type="submit" size="large" variant="contained">
               Save contact information
             </Button>
           </div>

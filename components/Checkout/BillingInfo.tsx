@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { useAppContext } from "../../../AppContext";
 
 interface Props {
   userInfoOpen: boolean;
@@ -23,6 +24,8 @@ interface Props {
   setShippingInfoOpen: (shippingInfoOpen: boolean) => void;
   shippingInfoSaved: boolean;
   paymentInfoOpen: boolean;
+  setPaymentInfoOpen: (paymentInfoOpen: boolean) => void;
+  paymentInfoSaved: boolean;
   name1: string;
   setName1: (name1: string) => void;
   name2: string;
@@ -75,6 +78,8 @@ export const BillingInfo: React.FC<Props> = ({
   setShippingInfoOpen,
   shippingInfoSaved,
   paymentInfoOpen,
+  setPaymentInfoOpen,
+  paymentInfoSaved,
   name1,
   setName1,
   name2,
@@ -98,6 +103,8 @@ export const BillingInfo: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
 
+  const { pickupMethod } = useAppContext();
+
   if (billingInfoOpen) {
     return (
       <React.Fragment>
@@ -108,8 +115,10 @@ export const BillingInfo: React.FC<Props> = ({
             e.preventDefault();
             setBillingInfoSaved(true);
             setBillingInfoOpen(false);
-            if (!shippingInfoSaved) {
+            if (!shippingInfoSaved && pickupMethod === "Shipping") {
               setShippingInfoOpen(true);
+            } else if (!paymentInfoSaved) {
+              setPaymentInfoOpen(true);
             }
           }}
         >
@@ -203,23 +212,25 @@ export const BillingInfo: React.FC<Props> = ({
               label="Postal code"
             />
           </div>
+          {pickupMethod === "Shipping" && (
+            <div className={classes.flex}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={billingAsShipping}
+                    onChange={(e, checked) => setBillingAsShipping(checked)}
+                    color="primary"
+                  />
+                }
+                label="Use billing address for shipping"
+              />
+            </div>
+          )}
           <div className={classes.flex}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={billingAsShipping}
-                  onChange={(e, checked) => setBillingAsShipping(checked)}
-                  color="primary"
-                />
-              }
-              label="Use billing address for shipping"
-            />
-          </div>
-          <div className={classes.flex}>
-            <Link href="/cart" className={classes.flexGrow}>
-              <Typography>{"< Return to cart"}</Typography>
+            <Link href="/" className={classes.flexGrow}>
+              <Typography>{"< Return to store"}</Typography>
             </Link>
-            <Button size="large" variant="contained">
+            <Button type="submit" size="large" variant="contained">
               Save billing address
             </Button>
           </div>

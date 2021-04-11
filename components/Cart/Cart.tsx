@@ -49,7 +49,7 @@ const formatter = new Intl.NumberFormat("en-US", {
 export const Cart: React.FC = () => {
   const classes = useStyles();
 
-  const { order } = useAppContext();
+  const { productCounts } = useAppContext();
 
   const [error, setError] = React.useState("");
   const [processing, setProcessing] = React.useState(false);
@@ -60,9 +60,9 @@ export const Cart: React.FC = () => {
     const getProducts = async () => {
       setProcessing(true);
       setProducts([]);
-      if (order.productCounts && order.productCounts.size !== 0) {
+      if (productCounts && productCounts.size !== 0) {
         const api = new ProductsApi("");
-        order.productCounts.forEach(async (productCount, productId) => {
+        productCounts.forEach(async (productCount, productId) => {
           const [ret, err] = await api.readItem(productId);
           if (ret) {
             setProducts((prevState) => [...prevState, ret]);
@@ -74,12 +74,12 @@ export const Cart: React.FC = () => {
       setProcessing(false);
     };
     getProducts().then();
-  }, [order]);
+  }, [productCounts]);
 
   React.useEffect(() => {
     let tempSubTotal = 0;
     products.forEach((product) => {
-      tempSubTotal += product.price * (order.productCounts.get(product.id) as number);
+      tempSubTotal += product.price * (productCounts.get(product.id) as number);
     });
     setSubTotal(tempSubTotal);
   }, [products]);
@@ -87,12 +87,12 @@ export const Cart: React.FC = () => {
   return (
     <React.Fragment>
       {products.map((product) => {
-        const count = order.productCounts.get(product.id) as number;
+        const count = productCounts.get(product.id) as number;
         const price = formatter.format(product.price * count);
         return (
           <div key={`product-${product.id}`} className={classes.item}>
             <Badge color="secondary" badgeContent={count} style={{ marginRight: 20 }}>
-              <img src={`images/demo/${product.id.toUpperCase()}.webp`} style={{ maxHeight: 40 }} />
+              <img src={`images/demo/${product.images[0]}`} style={{ maxHeight: 40 }} />
             </Badge>
             <Typography className={classes.flexGrow}>{product.name}</Typography>
             <Typography style={{ margin: "auto" }}>{price}</Typography>
@@ -114,9 +114,10 @@ export const Cart: React.FC = () => {
             size="large"
             variant="contained"
             style={{ marginLeft: "auto" }}
+            disabled={!productCounts || productCounts.size === 0}
             onClick={() => window.location.replace("/checkout")}
           >
-            Check out
+            Checkout
           </Button>
         </div>
       </div>

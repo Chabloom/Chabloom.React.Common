@@ -214,10 +214,10 @@ export const PaymentInfo: React.FC<Props> = ({
             />
           </div>
           <div className={classes.flex}>
-            <Link href="/cart" className={classes.flexGrow}>
-              <Typography>{"< Return to cart"}</Typography>
+            <Link href="/" className={classes.flexGrow}>
+              <Typography>{"< Return to store"}</Typography>
             </Link>
-            <Button size="large" variant="contained">
+            <Button type="submit" size="large" variant="contained">
               Save payment information
             </Button>
           </div>

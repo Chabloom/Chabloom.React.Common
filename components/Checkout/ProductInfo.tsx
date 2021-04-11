@@ -29,17 +29,17 @@ const useStyles = makeStyles((theme: Theme) =>
 export const ProductInfo: React.FC<Props> = ({ products, formatter }) => {
   const classes = useStyles();
 
-  const { order } = useAppContext();
+  const { productCounts } = useAppContext();
 
   return (
     <React.Fragment>
       {products.map((product) => {
-        const count = order.productCounts.get(product.id) as number;
+        const count = productCounts.get(product.id) as number;
         const price = formatter.format(product.price * count);
         return (
           <div key={`product-${product.id}`} className={classes.checkoutItem}>
             <Badge color="secondary" badgeContent={count} style={{ marginRight: 20 }}>
-              <img src={`images/demo/${product.id.toUpperCase()}.webp`} style={{ maxHeight: 40 }} />
+              <img src={`images/demo/${product.images[0]}`} style={{ maxHeight: 40 }} />
             </Badge>
             <Typography className={classes.flexGrow}>{product.name}</Typography>
             <Typography style={{ margin: "auto" }}>{price}</Typography>

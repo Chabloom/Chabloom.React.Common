@@ -13,6 +13,7 @@ import { PaymentInfo } from "./PaymentInfo";
 import { Status } from "../Status";
 import { ProductInfo } from "./ProductInfo";
 import { PricingInfo } from "./PricingInfo";
+import { OrdersApi, OrderViewModel } from "../../../types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,7 +65,7 @@ const formatter = new Intl.NumberFormat("en-US", {
 export const Checkout: React.FC = () => {
   const classes = useStyles();
 
-  const { order } = useAppContext();
+  const { productCounts, setProductCounts, pickupMethod } = useAppContext();
 
   const [error, setError] = React.useState("");
   const [processing, setProcessing] = React.useState(false);
@@ -136,9 +137,9 @@ export const Checkout: React.FC = () => {
     const getProducts = async () => {
       setProcessing(true);
       setProducts([]);
-      if (order.productCounts && order.productCounts.size !== 0) {
+      if (productCounts && productCounts.size !== 0) {
         const api = new ProductsApi("");
-        order.productCounts.forEach(async (productCount, productId) => {
+        productCounts.forEach(async (productCount, productId) => {
           const [ret, err] = await api.readItem(productId);
           if (ret) {
             setProducts((prevState) => [...prevState, ret]);
@@ -150,7 +151,7 @@ export const Checkout: React.FC = () => {
       setProcessing(false);
     };
     getProducts().then();
-  }, [order]);
+  }, [productCounts]);
 
   React.useEffect(() => {
     if (billingAsShipping) {
@@ -181,7 +182,7 @@ export const Checkout: React.FC = () => {
   React.useEffect(() => {
     let tempSubTotal = 0;
     products.forEach((product) => {
-      tempSubTotal += product.price * (order.productCounts.get(product.id) as number);
+      tempSubTotal += product.price * (productCounts.get(product.id) as number);
     });
     setSubTotal(tempSubTotal);
     setTaxes(tempSubTotal * 0.07);
@@ -224,6 +225,8 @@ export const Checkout: React.FC = () => {
                 setShippingInfoOpen={setShippingInfoOpen}
                 shippingInfoSaved={shippingInfoSaved}
                 paymentInfoOpen={paymentInfoOpen}
+                setPaymentInfoOpen={setPaymentInfoOpen}
+                paymentInfoSaved={paymentInfoSaved}
                 name1={billingName1}
                 setName1={setBillingName1}
                 name2={billingName2}
@@ -319,6 +322,24 @@ export const Checkout: React.FC = () => {
                   size="large"
                   variant="contained"
                   style={{ marginLeft: "auto" }}
+                  onClick={async () => {
+                    const order = {
+                      pickupMethod: pickupMethod,
+                      transactionId: "00000000-0000-0000-0000-000000000000",
+                      productCounts: {},
+                    } as OrderViewModel;
+                    productCounts.forEach((count, productId) => {
+                      order.productCounts[productId] = count;
+                    });
+                    const api = new OrdersApi();
+                    const [ret, err] = await api.addItem("", order);
+                    if (ret) {
+                      setProductCounts(new Map<string, number>());
+                      window.location.replace(`/orderStatus?orderId=${ret.id}`);
+                    } else {
+                      setError(err);
+                    }
+                  }}
                 >
                   Pay now
                 </Button>
