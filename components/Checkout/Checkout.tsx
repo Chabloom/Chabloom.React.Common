@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Container, createStyles, Grid, Hidden, Theme, Toolbar } from "@material-ui/core";
+import { AppBar, Button, Container, createStyles, Grid, Hidden, Theme, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { ProductsApi, ProductViewModel } from "../../types";
@@ -73,6 +73,7 @@ export const Checkout: React.FC = () => {
   const [products, setProducts] = React.useState<Array<ProductViewModel>>([]);
   const [subTotal, setSubTotal] = React.useState(0);
   const [taxes, setTaxes] = React.useState(0);
+  const [shipping, setShipping] = React.useState(0);
 
   // Contact info
   const [userInfoOpen, setUserInfoOpen] = React.useState(true);
@@ -186,14 +187,17 @@ export const Checkout: React.FC = () => {
     });
     setSubTotal(tempSubTotal);
     setTaxes(tempSubTotal * 0.07);
+    setShipping(4.99);
   }, [products]);
 
   return (
     <React.Fragment>
       <header className={classes.header}>
-        <Toolbar>
-          <img src="images/demo/logo-alternate.svg" height="50" />
-        </Toolbar>
+        <AppBar color="default" position="fixed">
+          <Toolbar>
+            <img src="https://www.mlbstatic.com/team-logos/478.svg" height="50" />
+          </Toolbar>
+        </AppBar>
       </header>
       <Grid container className={classes.container}>
         <Grid item sm={7} xs={12}>
@@ -313,7 +317,13 @@ export const Checkout: React.FC = () => {
               <Status processing={processing} error={error} />
             </div>
             <div className={classes.infoForm}>
-              <PricingInfo subTotal={subTotal} taxes={taxes} formatter={formatter} />
+              <PricingInfo
+                subTotal={subTotal}
+                taxes={taxes}
+                shipping={shipping}
+                hasShipping={shippingInfoSaved && pickupMethod === "Shipping"}
+                formatter={formatter}
+              />
             </div>
             <div className={classes.infoForm}>
               <div className={classes.flex}>

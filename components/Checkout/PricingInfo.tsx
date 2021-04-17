@@ -6,6 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 interface Props {
   subTotal: number;
   taxes: number;
+  shipping: number;
+  hasShipping: boolean;
   formatter: Intl.NumberFormat;
 }
 
@@ -32,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const PricingInfo: React.FC<Props> = ({ subTotal, taxes, formatter }) => {
+export const PricingInfo: React.FC<Props> = ({ subTotal, taxes, shipping, hasShipping, formatter }) => {
   const classes = useStyles();
 
   return (
@@ -49,6 +51,16 @@ export const PricingInfo: React.FC<Props> = ({ subTotal, taxes, formatter }) => 
           </div>
         </div>
       </div>
+      {hasShipping && (
+        <div className={classes.infoDisplay}>
+          <div className={classes.infoSubDisplay}>
+            <div className={classes.flex}>
+              <Typography className={classes.flexGrow}>Shipping</Typography>
+              <Typography>{formatter.format(shipping)}</Typography>
+            </div>
+          </div>
+        </div>
+      )}
       <div className={classes.infoSubDisplay} />
       <div className={classes.infoDisplay}>
         <div className={classes.infoSubDisplay}>
@@ -56,7 +68,7 @@ export const PricingInfo: React.FC<Props> = ({ subTotal, taxes, formatter }) => 
             <Typography variant="h6" className={classes.flexGrow}>
               Total
             </Typography>
-            <Typography variant="h6">{formatter.format(subTotal + taxes)}</Typography>
+            <Typography variant="h6">{formatter.format(subTotal + taxes + shipping)}</Typography>
           </div>
         </div>
       </div>
