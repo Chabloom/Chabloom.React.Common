@@ -13,7 +13,7 @@ import { PaymentInfo } from "./PaymentInfo";
 import { Status } from "../Status";
 import { ProductInfo } from "./ProductInfo";
 import { PricingInfo } from "./PricingInfo";
-import { OrdersApi, OrderViewModel } from "../../../types";
+import { OrdersApi, OrderViewModel } from "../../types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
