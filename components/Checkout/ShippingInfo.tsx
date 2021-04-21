@@ -32,6 +32,8 @@ interface Props {
   setState: (state: string) => void;
   postCode: string;
   setPostCode: (postCode: string) => void;
+  seatingLocation: string;
+  setSeatingLocation: (seatingLocation: string) => void;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -82,18 +84,17 @@ export const ShippingInfo: React.FC<Props> = ({
   setState,
   postCode,
   setPostCode,
+  seatingLocation,
+  setSeatingLocation,
 }) => {
   const classes = useStyles();
 
   const { pickupMethod } = useAppContext();
 
   React.useEffect(() => {
-    if (pickupMethod !== "Shipping") {
+    if (pickupMethod !== "Shipping" && pickupMethod !== "In-Store") {
       setShippingInfoSaved(true);
       setShippingInfoOpen(false);
-      if (!paymentInfoSaved) {
-        setPaymentInfoOpen(true);
-      }
     }
   }, []);
 
@@ -213,12 +214,63 @@ export const ShippingInfo: React.FC<Props> = ({
         </form>
       </React.Fragment>
     );
+  } else if (shippingInfoOpen && pickupMethod === "In-Store") {
+    return (
+      <React.Fragment>
+        <Typography variant="h6">Seating location</Typography>
+        <form
+          className={classes.root}
+          onSubmit={(e) => {
+            e.preventDefault();
+            setShippingInfoSaved(true);
+            setShippingInfoOpen(false);
+            if (!paymentInfoSaved) {
+              setPaymentInfoOpen(true);
+            }
+          }}
+        >
+          <div className={classes.flex}>
+            <TextField
+              fullWidth
+              required
+              value={seatingLocation}
+              onChange={(e) => setSeatingLocation(e.target.value)}
+              label="Seating location (row/seat)"
+            />
+          </div>
+          <div className={classes.flex}>
+            <Link href="/" className={classes.flexGrow}>
+              <Typography>{"< Return to store"}</Typography>
+            </Link>
+            <Button type="submit" size="large" variant="contained">
+              Save seating location
+            </Button>
+          </div>
+        </form>
+      </React.Fragment>
+    );
   } else if (shippingInfoSaved && pickupMethod === "Shipping") {
     return (
       <Paper className={classes.paper} variant="outlined">
         <div className={classes.flex}>
           <Typography className={classes.flexGrow}>Shipping</Typography>
           <Typography className={classes.flexGrow}>{`${address1} ${city}, ${state} ${country}`}</Typography>
+          <Button
+            disabled={userInfoOpen || billingInfoOpen || paymentInfoOpen}
+            onClick={() => setShippingInfoOpen(true)}
+            variant="text"
+          >
+            Change
+          </Button>
+        </div>
+      </Paper>
+    );
+  } else if (shippingInfoSaved && pickupMethod === "In-Store") {
+    return (
+      <Paper className={classes.paper} variant="outlined">
+        <div className={classes.flex}>
+          <Typography className={classes.flexGrow}>Seating location</Typography>
+          <Typography className={classes.flexGrow}>{seatingLocation}</Typography>
           <Button
             disabled={userInfoOpen || billingInfoOpen || paymentInfoOpen}
             onClick={() => setShippingInfoOpen(true)}

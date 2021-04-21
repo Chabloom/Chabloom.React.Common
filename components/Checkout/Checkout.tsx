@@ -106,6 +106,7 @@ export const Checkout: React.FC = () => {
   const [shippingCountry, setShippingCountry] = React.useState("");
   const [shippingState, setShippingState] = React.useState("");
   const [shippingPostCode, setShippingPostCode] = React.useState("");
+  const [seatingLocation, setSeatingLocation] = React.useState("");
 
   // Payment info
   const [paymentInfoOpen, setPaymentInfoOpen] = React.useState(false);
@@ -282,6 +283,8 @@ export const Checkout: React.FC = () => {
                 setState={setShippingState}
                 postCode={shippingPostCode}
                 setPostCode={setShippingPostCode}
+                seatingLocation={seatingLocation}
+                setSeatingLocation={setSeatingLocation}
               />
             </div>
             <div className={classes.infoForm}>

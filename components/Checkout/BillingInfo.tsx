@@ -115,7 +115,7 @@ export const BillingInfo: React.FC<Props> = ({
             e.preventDefault();
             setBillingInfoSaved(true);
             setBillingInfoOpen(false);
-            if (!shippingInfoSaved && pickupMethod === "Shipping") {
+            if (!shippingInfoSaved && (pickupMethod === "Shipping" || pickupMethod === "In-Store")) {
               setShippingInfoOpen(true);
             } else if (!paymentInfoSaved) {
               setPaymentInfoOpen(true);
