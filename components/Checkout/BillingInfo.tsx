@@ -184,7 +184,7 @@ export const BillingInfo: React.FC<Props> = ({
             />
           </div>
           <div className={classes.flex}>
-            <TextField
+            {/*            <TextField
               fullWidth
               required
               name="bill-country"
@@ -192,7 +192,7 @@ export const BillingInfo: React.FC<Props> = ({
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               label="Country/Region"
-            />
+            />*/}
             <TextField
               fullWidth
               required
