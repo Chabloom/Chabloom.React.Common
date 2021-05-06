@@ -19,10 +19,10 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface Props {
-  userManager: UserManager,
+  userManager: UserManager;
 }
 
-export const SignInCallback: React.FC<Props> = ({userManager}) => {
+export const SignInCallback: React.FC<Props> = ({ userManager }) => {
   // Initialize classes
   const classes = useStyles();
 
