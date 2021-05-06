@@ -1,4 +1,4 @@
-import { ApplicationConfig } from "../../../types";
+import { AppConfiguration } from "../../../api";
 import { BaseApi, BaseApiType } from "../apiBase";
 import { ProductViewModel } from "./model";
 
@@ -9,7 +9,7 @@ export class ProductsApi extends BaseApi<ProductViewModel> implements BaseApiTyp
 
   constructor(categoryId = "", method = "") {
     super();
-    this.baseUrl = `${ApplicationConfig.ecommerceBackendPublicAddress}/api/products`;
+    this.baseUrl = `${AppConfiguration.ecommerceBackendPublicAddress}/api/products`;
     this.categoryId = categoryId;
     this.method = method;
   }
