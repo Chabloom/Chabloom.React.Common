@@ -1,11 +1,9 @@
 import * as React from "react";
-
+import { UserManager } from "oidc-client";
 import { createStyles, Grid, Paper, Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { Status } from "./Status";
-
-import { useAppContext } from "../../AppContext";
 
 import logo from "../images/chabloom-icon.svg";
 
@@ -20,20 +18,22 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const SignInCallback: React.FC = () => {
+interface Props {
+  userManager: UserManager,
+}
+
+export const SignInCallback: React.FC<Props> = ({userManager}) => {
   // Initialize classes
   const classes = useStyles();
-
-  const context = useAppContext();
 
   // Sign in and redirect to the specified redirect URI
   React.useEffect(() => {
     const redirectUri = localStorage.getItem("redirectUri");
-    context.userManager.signinRedirectCallback().then(() => {
+    userManager.signinRedirectCallback().then(() => {
       localStorage.setItem("SignedIn", "true");
       window.location.replace(redirectUri === null ? "/" : redirectUri);
     });
-  }, [context.userManager]);
+  }, [userManager]);
 
   return (
     <Grid container alignItems="center" justifyContent="center" style={{ minHeight: "100vh" }}>

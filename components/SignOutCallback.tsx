@@ -1,11 +1,9 @@
 import * as React from "react";
-
+import { UserManager } from "oidc-client";
 import { createStyles, Grid, Paper, Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { Status } from "./Status";
-
-import { useAppContext } from "../../AppContext";
 
 import logo from "../images/chabloom-icon.svg";
 
@@ -20,7 +18,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const SignOutCallback: React.FC = () => {
+interface Props {
+  userManager: UserManager,
+}
+
+export const SignOutCallback: React.FC<Props> = ({userManager}) => {
   // Initialize classes
   const classes = useStyles();
 
@@ -28,15 +30,13 @@ export const SignOutCallback: React.FC = () => {
   const [error, setError] = React.useState("");
   const [processing, setProcessing] = React.useState(false);
 
-  const context = useAppContext();
-
   // Sign out and redirect to the specified redirect URI
   React.useEffect(() => {
     setProcessing(true);
     // Removed the signed in key
     localStorage.removeItem("SignedIn");
     const redirectUri = localStorage.getItem("redirectUri");
-    context.userManager.signoutRedirectCallback().then((value) => {
+    userManager.signoutRedirectCallback().then((value) => {
       if (value.error) {
         setError(value.error);
         return;
@@ -48,7 +48,7 @@ export const SignOutCallback: React.FC = () => {
       window.location.replace("/");
     });
     setProcessing(false);
-  }, [context.userManager]);
+  }, [userManager]);
 
   return (
     <Grid container alignItems="center" justifyContent="center" style={{ minHeight: "100vh" }}>
