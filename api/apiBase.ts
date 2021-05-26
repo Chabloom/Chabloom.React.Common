@@ -5,11 +5,11 @@ export interface BaseApiType<T extends BaseViewModel> {
 
   read(token: string, id: string): Promise<[Response | undefined, T | undefined, string]>;
 
-  create(token: string, item: T): Promise<[Response | undefined, T | undefined, string]>;
+  create(token: string, viewModel: T): Promise<[Response | undefined, T | undefined, string]>;
 
-  edit(token: string, item: T): Promise<[Response | undefined, T | undefined, string]>;
+  edit(token: string, viewModel: T): Promise<[Response | undefined, T | undefined, string]>;
 
-  delete(token: string, id: string): Promise<[Response | undefined, string]>;
+  delete(token: string, viewModel: T): Promise<[Response | undefined, string]>;
 }
 
 export class BaseApi<T extends BaseViewModel> {
