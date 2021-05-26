@@ -1,156 +1,196 @@
 import { BaseViewModel } from "./modelBase";
 
 export interface BaseApiType<T extends BaseViewModel> {
-  readItems(token: string): Promise<[Array<T> | undefined, string]>;
+  readAll(token: string): Promise<[Response | undefined, Array<T> | undefined, string]>;
 
-  readItem(token: string, itemId: string): Promise<[T | undefined, string]>;
+  read(token: string, id: string): Promise<[Response | undefined, T | undefined, string]>;
 
-  addItem(token: string, item: T): Promise<[T | undefined, string]>;
+  create(token: string, item: T): Promise<[Response | undefined, T | undefined, string]>;
 
-  editItem(token: string, item: T): Promise<[T | undefined, string]>;
+  edit(token: string, item: T): Promise<[Response | undefined, T | undefined, string]>;
 
-  deleteItem(token: string, item: T): Promise<string | undefined>;
+  delete(token: string, id: string): Promise<[Response | undefined, string]>;
 }
 
 export class BaseApi<T extends BaseViewModel> {
-  _readItems = async (url: string, token: string, requireAuth = true): Promise<[Array<T> | undefined, string]> => {
+  _getAll = async (
+    url: string,
+    token: string | undefined = undefined
+  ): Promise<[Response | undefined, Array<T> | undefined, string]> => {
+    let response: Response | undefined;
+    let data: Array<T> | undefined;
+    let message = "";
     try {
-      let response: Response;
-      if (requireAuth) {
+      if (token) {
         const headers = new Headers();
         headers.append("Authorization", `Bearer ${token}`);
         response = await fetch(url, {
           method: "GET",
+          referrerPolicy: "origin",
           headers: headers,
           credentials: "include",
         });
       } else {
         response = await fetch(url, {
           method: "GET",
+          referrerPolicy: "origin",
         });
       }
       if (response.status === 200) {
-        const retJson = await response.json();
-        return [retJson, ""];
-      } else {
-        return [undefined, response.statusText];
+        data = await response.json();
+      } else if (response.status !== 204) {
+        message = response.statusText;
       }
     } catch (e) {
-      return [undefined, e.message];
+      message = e.message;
     }
+    return [response, data, message];
   };
 
-  _readItem = async (url: string, token: string, requireAuth = true): Promise<[T | undefined, string]> => {
+  _get = async (
+    url: string,
+    token: string | undefined = undefined
+  ): Promise<[Response | undefined, T | undefined, string]> => {
+    let response: Response | undefined;
+    let data: T | undefined;
+    let message = "";
     try {
-      let response: Response;
-      if (requireAuth) {
+      if (token) {
         const headers = new Headers();
         headers.append("Authorization", `Bearer ${token}`);
         response = await fetch(url, {
           method: "GET",
+          referrerPolicy: "origin",
           headers: headers,
           credentials: "include",
         });
       } else {
         response = await fetch(url, {
           method: "GET",
+          referrerPolicy: "origin",
         });
       }
       if (response.status === 200) {
-        const retJson = await response.json();
-        return [retJson, ""];
-      } else {
-        return [undefined, response.statusText];
+        data = await response.json();
+      } else if (response.status !== 204) {
+        message = response.statusText;
       }
     } catch (e) {
-      return [undefined, e.message];
+      message = e.message;
     }
+    return [response, data, message];
   };
 
-  _addItem = async (url: string, token: string, item: T, requireAuth = true): Promise<[T | undefined, string]> => {
+  _post = async (
+    url: string,
+    token: string | undefined = undefined,
+    viewModel: T | undefined = undefined
+  ): Promise<[Response | undefined, T | undefined, string]> => {
+    let response: Response | undefined;
+    let data: T | undefined;
+    let message = "";
     try {
-      let response: Response;
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (requireAuth) {
+      let body: string | undefined;
+      if (viewModel) {
+        headers.append("Content-Type", "application/json");
+        body = JSON.stringify(viewModel);
+      }
+      if (token) {
         headers.append("Authorization", `Bearer ${token}`);
         response = await fetch(url, {
           method: "POST",
+          referrerPolicy: "origin",
           headers: headers,
           credentials: "include",
-          body: JSON.stringify(item),
+          body: body,
         });
       } else {
         response = await fetch(url, {
           method: "POST",
+          referrerPolicy: "origin",
           headers: headers,
-          body: JSON.stringify(item),
+          body: body,
         });
       }
-      if (response.status === 201) {
-        const retJson = await response.json();
-        return [retJson, ""];
-      } else {
-        return [undefined, response.statusText];
+      if (response.status === 200 || response.status === 201) {
+        data = await response.json();
+      } else if (response.status !== 204) {
+        message = response.statusText;
       }
     } catch (e) {
-      return [undefined, e.message];
+      message = e.message;
     }
+    return [response, data, message];
   };
 
-  _editItem = async (url: string, token: string, item: T, requireAuth = true): Promise<[T | undefined, string]> => {
+  _put = async (
+    url: string,
+    token: string | undefined = undefined,
+    viewModel: T | undefined = undefined
+  ): Promise<[Response | undefined, T | undefined, string]> => {
+    let response: Response | undefined;
+    let data: T | undefined;
+    let message = "";
     try {
-      let response: Response;
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (requireAuth) {
+      let body: string | undefined;
+      if (viewModel) {
+        headers.append("Content-Type", "application/json");
+        body = JSON.stringify(viewModel);
+      }
+      if (token) {
         headers.append("Authorization", `Bearer ${token}`);
         response = await fetch(url, {
           method: "PUT",
+          referrerPolicy: "origin",
           headers: headers,
           credentials: "include",
-          body: JSON.stringify(item),
+          body: body,
         });
       } else {
         response = await fetch(url, {
           method: "PUT",
+          referrerPolicy: "origin",
           headers: headers,
-          body: JSON.stringify(item),
+          body: body,
         });
       }
       if (response.status === 200) {
-        const retJson = await response.json();
-        return [retJson, ""];
-      } else {
-        return [undefined, response.statusText];
+        data = await response.json();
+      } else if (response.status !== 204) {
+        message = response.statusText;
       }
     } catch (e) {
-      return [undefined, e.message];
+      message = e.message;
     }
+    return [response, data, message];
   };
 
-  _deleteItem = async (url: string, token: string, requireAuth = true): Promise<string | undefined> => {
+  _delete = async (url: string, token: string | undefined = undefined): Promise<[Response | undefined, string]> => {
+    let response: Response | undefined;
+    let message = "";
     try {
-      let response: Response;
-      if (requireAuth) {
+      if (token) {
         const headers = new Headers();
         headers.append("Authorization", `Bearer ${token}`);
         response = await fetch(url, {
           method: "DELETE",
+          referrerPolicy: "origin",
           headers: headers,
         });
       } else {
         response = await fetch(url, {
           method: "DELETE",
+          referrerPolicy: "origin",
         });
       }
-      if (response.status === 204) {
-        return undefined;
-      } else {
-        return response.statusText;
+      if (response.status !== 200 && response.status !== 204) {
+        message = response.statusText;
       }
     } catch (e) {
-      return e.message;
+      message = e.message;
     }
+    return [response, message];
   };
 }
