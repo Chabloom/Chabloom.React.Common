@@ -1,25 +1,50 @@
 import { BaseViewModel } from "./modelBase";
 
 export interface BaseApiType<T extends BaseViewModel> {
-  readAll(token: string): Promise<[Response | undefined, Array<T> | undefined, string]>;
+  getAll(token: string | undefined): Promise<Array<T> | undefined>;
 
-  read(token: string, id: string): Promise<[Response | undefined, T | undefined, string]>;
+  get(id: string, token: string | undefined): Promise<T | undefined>;
 
-  create(token: string, viewModel: T): Promise<[Response | undefined, T | undefined, string]>;
+  create(viewModel: T, token: string | undefined): Promise<T | undefined>;
 
-  edit(token: string, viewModel: T): Promise<[Response | undefined, T | undefined, string]>;
+  edit(id: string, viewModel: T, token: string | undefined): Promise<T | undefined>;
 
-  delete(token: string, viewModel: T): Promise<[Response | undefined, string]>;
+  delete(id: string, token: string | undefined): Promise<boolean>;
+
+  getLastError(): string;
 }
 
-export class BaseApi<T extends BaseViewModel> {
-  _getAll = async (
-    url: string,
-    token: string | undefined = undefined
-  ): Promise<[Response | undefined, Array<T> | undefined, string]> => {
+export class BaseApi<T extends BaseViewModel> implements BaseApiType<T> {
+  baseUrl = "";
+  lastError = "";
+
+  getAll(token: string | undefined = undefined): Promise<T[] | undefined> {
+    return this._getAll(`${this.baseUrl}`, token);
+  }
+
+  get(id: string, token: string | undefined = undefined): Promise<T | undefined> {
+    return this._get(`${this.baseUrl}/${id}`, token);
+  }
+
+  create(viewModel: T, token: string | undefined = undefined): Promise<T | undefined> {
+    return this._create(`${this.baseUrl}`, viewModel, token);
+  }
+
+  edit(id: string, viewModel: T, token: string | undefined = undefined): Promise<T | undefined> {
+    return this._edit(`${this.baseUrl}/${id}`, viewModel, token);
+  }
+
+  delete(id: string, token: string | undefined = undefined): Promise<boolean> {
+    return this._delete(`${this.baseUrl}/${id}`, token);
+  }
+
+  getLastError(): string {
+    return this.lastError;
+  }
+
+  _getAll = async (url: string, token: string | undefined = undefined): Promise<Array<T> | undefined> => {
     let response: Response | undefined;
     let data: Array<T> | undefined;
-    let message = "";
     try {
       if (token) {
         const headers = new Headers();
@@ -39,56 +64,51 @@ export class BaseApi<T extends BaseViewModel> {
       if (response.status === 200) {
         data = await response.json();
       } else if (response.status !== 204) {
-        message = response.statusText;
+        this.lastError = response.statusText;
       }
     } catch (e) {
-      message = e.message;
+      this.lastError = e.message;
     }
-    return [response, data, message];
+    return data;
   };
 
-  _get = async (
+  _get = async (url: string, token: string | undefined = undefined): Promise<T | undefined> => {
+    let response: Response | undefined;
+    let data: T | undefined;
+    try {
+      if (token) {
+        const headers = new Headers();
+        headers.append("Authorization", `Bearer ${token}`);
+        response = await fetch(url, {
+          method: "GET",
+          referrerPolicy: "origin",
+          headers: headers,
+          credentials: "include",
+        });
+      } else {
+        response = await fetch(url, {
+          method: "GET",
+          referrerPolicy: "origin",
+        });
+      }
+      if (response.status === 200) {
+        data = await response.json();
+      } else if (response.status !== 204) {
+        this.lastError = response.statusText;
+      }
+    } catch (e) {
+      this.lastError = e.message;
+    }
+    return data;
+  };
+
+  _create = async (
     url: string,
+    viewModel: T | undefined = undefined,
     token: string | undefined = undefined
-  ): Promise<[Response | undefined, T | undefined, string]> => {
+  ): Promise<T | undefined> => {
     let response: Response | undefined;
     let data: T | undefined;
-    let message = "";
-    try {
-      if (token) {
-        const headers = new Headers();
-        headers.append("Authorization", `Bearer ${token}`);
-        response = await fetch(url, {
-          method: "GET",
-          referrerPolicy: "origin",
-          headers: headers,
-          credentials: "include",
-        });
-      } else {
-        response = await fetch(url, {
-          method: "GET",
-          referrerPolicy: "origin",
-        });
-      }
-      if (response.status === 200) {
-        data = await response.json();
-      } else if (response.status !== 204) {
-        message = response.statusText;
-      }
-    } catch (e) {
-      message = e.message;
-    }
-    return [response, data, message];
-  };
-
-  _post = async (
-    url: string,
-    token: string | undefined = undefined,
-    viewModel: T | undefined = undefined
-  ): Promise<[Response | undefined, T | undefined, string]> => {
-    let response: Response | undefined;
-    let data: T | undefined;
-    let message = "";
     try {
       const headers = new Headers();
       let body: string | undefined;
@@ -116,22 +136,21 @@ export class BaseApi<T extends BaseViewModel> {
       if (response.status === 200 || response.status === 201) {
         data = await response.json();
       } else if (response.status !== 204) {
-        message = response.statusText;
+        this.lastError = response.statusText;
       }
     } catch (e) {
-      message = e.message;
+      this.lastError = e.message;
     }
-    return [response, data, message];
+    return data;
   };
 
-  _put = async (
+  _edit = async (
     url: string,
-    token: string | undefined = undefined,
-    viewModel: T | undefined = undefined
-  ): Promise<[Response | undefined, T | undefined, string]> => {
+    viewModel: T | undefined = undefined,
+    token: string | undefined = undefined
+  ): Promise<T | undefined> => {
     let response: Response | undefined;
     let data: T | undefined;
-    let message = "";
     try {
       const headers = new Headers();
       let body: string | undefined;
@@ -159,17 +178,16 @@ export class BaseApi<T extends BaseViewModel> {
       if (response.status === 200) {
         data = await response.json();
       } else if (response.status !== 204) {
-        message = response.statusText;
+        this.lastError = response.statusText;
       }
     } catch (e) {
-      message = e.message;
+      this.lastError = e.message;
     }
-    return [response, data, message];
+    return data;
   };
 
-  _delete = async (url: string, token: string | undefined = undefined): Promise<[Response | undefined, string]> => {
+  _delete = async (url: string, token: string | undefined = undefined): Promise<boolean> => {
     let response: Response | undefined;
-    let message = "";
     try {
       if (token) {
         const headers = new Headers();
@@ -186,11 +204,11 @@ export class BaseApi<T extends BaseViewModel> {
         });
       }
       if (response.status !== 200 && response.status !== 204) {
-        message = response.statusText;
+        this.lastError = response.statusText;
       }
     } catch (e) {
-      message = e.message;
+      this.lastError = e.message;
     }
-    return [response, message];
+    return true;
   };
 }
